@@ -1,0 +1,28 @@
+{
+  "name": "application-workflow-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Application Workflow Tracker monorepo.",
+  "scripts": {
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "npm run start -w backend",
+    "start:frontend": "npm run start -w frontend",
+    "build": "npm run build -w frontend",
+    "lint": "npm run lint -w frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/waynemwashuma/applicant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/waynemwashuma/applicant/issues"
+  },
+  "homepage": "https://waynemwashuma.github.io/applicant/",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
