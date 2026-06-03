@@ -1,79 +1,46 @@
-# Application Workflow Tracker
+# Weather App
 
-This project has two parts:
+This repository contains:
 
-- A Django backend that stores and serves application data
-- A React frontend that lets you create, review, and update applications
+- A React frontend in `frontend/`
+- An Express + PostgreSQL backend in `backend/`
 
-## User guide
+## Quick Start
 
-If you want to understand how the website works before running it, start with the [User Guide](user-guide.md). It explains the user flow and the reviewer flow step by step.
-
-There is also a [live version](https://waynemwashuma.github.io/applicant/) of the frontend on this repository's GitHub Pages site, and it uses mock data so you can explore the app without running the backend locally.
-
-## What You Need
-
-- A computer with `Node.js` and `npm` installed
-- Python 3.12 for the backend
-- A web browser such as Chrome, Edge, Firefox, or Safari
-- The backend has its own setup steps available in [backend/README.md](backend/README.md).
-
-## Start Here
-
-1. Open a terminal.
-2. Go to this project folder.
-3. Set up the backend by following [backend/README.md](backend/README.md).
-4. Install the JavaScript dependencies:
+1. Install dependencies from the repository root:
 
 ```bash
 npm install
 ```
 
-5. Start both the backend and frontend together:
+2. Create `backend/.env` from `backend/.env.example` and set your PostgreSQL connection details and JWT secret.
+3. Make sure PostgreSQL is running and the database in `DATABASE_URL` exists.
+4. Start both apps:
 
 ```bash
 npm start
 ```
 
-6. Wait for both servers to finish starting.
-7. Open the app in your browser:
+Frontend:
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://127.0.0.1:8000`
+- `http://localhost:5173`
 
-## If You Want To Run Only One Part
+Backend:
 
-Start only the frontend:
+- `http://localhost:8000`
 
-```bash
-npm run start:frontend
-```
+## Backend API
 
-Start only the backend:
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/weather/:city`
+- `GET /api/forecast/:city`
+- `POST /api/favorites`
+- `GET /api/favorites`
+- `DELETE /api/favorites/:city`
 
-```bash
-npm run start:backend
-```
+## Notes
 
-## Project Layout
-
-- `backend/` contains the Django project and API
-- `frontend/` contains the React app
-- `package.json` contains the root commands for running both together
-
-## Useful Reads
-
-- [Backend README](backend/README.md)
-- [Frontend README](frontend/README.md)
-- [User Guide](user-guide.md)
-
-## Common Problems
-
-- If `npm start` fails because the backend cannot find a Python interpreter, check that the backend virtual environment exists and that you completed the steps in `backend/README.md`.
-- If port `5173` or `8000` is already in use, close the other program using that port and try again.
-- If the browser shows old data, clear the site data or do a hard refresh.
-
-## Contact details
-
-name: Wayne Mwashuma
-email: <mwashumawayne@gmail.com>
+- Weather data comes from Open-Meteo.
+- JWTs are required for weather and favorites endpoints.
+- The backend bootstraps its PostgreSQL tables on startup.
