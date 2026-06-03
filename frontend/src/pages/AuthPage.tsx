@@ -42,7 +42,7 @@ function AuthPage({ onAuthenticated }: AuthPageProps) {
         },
       })
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'Authentication failed.')
+      setError(requestError instanceof Error ? requestError.message : null)
     } finally {
       setIsSubmitting(false)
     }

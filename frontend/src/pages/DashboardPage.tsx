@@ -69,7 +69,7 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
               condition: null,
               humidity: null,
               windSpeed: null,
-              error: error instanceof Error ? error.message : 'Unable to load weather.',
+              error: error instanceof Error ? error.message : undefined,
             }
           }
         }),
@@ -77,7 +77,7 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
 
       setFavoriteWeather(snapshots)
     } catch (error) {
-      setFavoritesError(error instanceof Error ? error.message : 'Unable to load favorites.')
+      setFavoritesError(error instanceof Error ? error.message : null)
       setFavoriteWeather([])
     } finally {
       setFavoritesLoading(false)
@@ -94,11 +94,6 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
 
   const runSearch = async (city: string): Promise<CurrentWeather | null> => {
     const query = city.trim()
-    if (!query) {
-      setSearchError('Enter a city name to search.')
-      return null
-    }
-
     setSearchLoading(true)
     setSearchError(null)
     setSearchMessage(`Loading weather for ${query}...`)
@@ -115,7 +110,7 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
       setCityQuery(weather.city)
       return weather
     } catch (error) {
-      setSearchError(error instanceof Error ? error.message : 'Unable to fetch weather data.')
+      setSearchError(error instanceof Error ? error.message : null)
       setSearchMessage('Search for a city to begin.')
       setCurrentWeather(null)
       setForecast([])
@@ -136,12 +131,6 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
 
   const handleAddFavorite = async () => {
     if (!currentWeather) {
-      setSearchError('Search for a city before saving it.')
-      return
-    }
-
-    if (favoriteWeather.length >= 3 && !favoriteWeather.some((entry) => entry.city === currentWeather.city)) {
-      setFavoritesError('You can save up to 3 favorite cities.')
       return
     }
 
@@ -151,7 +140,7 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
       await addFavoriteCity(currentWeather.city, session.token)
       await loadFavorites()
     } catch (error) {
-      setFavoritesError(error instanceof Error ? error.message : 'Unable to save favorite city.')
+      setFavoritesError(error instanceof Error ? error.message : null)
     } finally {
       setFavoritesBusy(null)
     }
@@ -165,7 +154,7 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
       await removeFavoriteCity(city, session.token)
       await loadFavorites()
     } catch (error) {
-      setFavoritesError(error instanceof Error ? error.message : 'Unable to remove favorite city.')
+      setFavoritesError(error instanceof Error ? error.message : null)
     } finally {
       setFavoritesBusy(null)
     }
@@ -207,6 +196,7 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
                 type="text"
                 placeholder="Nairobi"
                 autoComplete="off"
+                required
               />
             </label>
 
