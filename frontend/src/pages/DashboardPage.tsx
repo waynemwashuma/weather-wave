@@ -174,11 +174,8 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
     <main className="dashboard-shell">
       <header className="dashboard-header">
         <div>
-          <p className="eyebrow">WeatherWave Dashboard</p>
+          <p className="eyebrow">Weather Wave Dashboard</p>
           <h1>Welcome back, {session.user.name}.</h1>
-          <p className="dashboard-copy">
-            Search cities, inspect 5-day forecasts, and keep track of your top favorite places.
-          </p>
         </div>
 
         <button type="button" className="secondary-button signout-button" onClick={onSignOut}>

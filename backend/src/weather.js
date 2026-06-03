@@ -1,39 +1,15 @@
+import { config } from './config.js'
 import { AppError } from './errors.js'
 import { titleCase } from './utils.js'
 
-const WEATHER_CODE_MAP = new Map([
-  [0, 'Clear sky'],
-  [1, 'Mainly clear'],
-  [2, 'Partly cloudy'],
-  [3, 'Overcast'],
-  [45, 'Fog'],
-  [48, 'Depositing rime fog'],
-  [51, 'Light drizzle'],
-  [53, 'Moderate drizzle'],
-  [55, 'Dense drizzle'],
-  [56, 'Freezing drizzle'],
-  [57, 'Freezing drizzle'],
-  [61, 'Light rain'],
-  [63, 'Moderate rain'],
-  [65, 'Heavy rain'],
-  [66, 'Freezing rain'],
-  [67, 'Freezing rain'],
-  [71, 'Light snow'],
-  [73, 'Moderate snow'],
-  [75, 'Heavy snow'],
-  [77, 'Snow grains'],
-  [80, 'Rain showers'],
-  [81, 'Rain showers'],
-  [82, 'Violent rain showers'],
-  [85, 'Snow showers'],
-  [86, 'Snow showers'],
-  [95, 'Thunderstorm'],
-  [96, 'Thunderstorm with hail'],
-  [99, 'Thunderstorm with hail'],
-])
-
-function weatherConditionFromCode(code) {
-  return WEATHER_CODE_MAP.get(code) ?? 'Unknown conditions'
+function ensureApiKey() {
+  if (!config.openWeatherApiKey) {
+    throw new AppError(
+      500,
+      'The OpenWeather API key is missing. Set OPENWEATHER_API_KEY in backend/.env.',
+      'MISSING_WEATHER_API_KEY',
+    )
+  }
 }
 
 async function fetchJson(url, errorMessage) {
@@ -45,6 +21,7 @@ async function fetchJson(url, errorMessage) {
     if (!response.ok) {
       throw new AppError(502, errorMessage, 'EXTERNAL_API_FAILURE')
     }
+
     return await response.json()
   } catch (error) {
     if (error instanceof AppError) {
@@ -61,86 +38,134 @@ async function fetchJson(url, errorMessage) {
   }
 }
 
-async function resolveCity(city) {
+async function fetchOpenWeather(path, params, errorMessage) {
+  ensureApiKey()
+
   const query = new URLSearchParams({
-    name: city,
-    count: '1',
-    language: 'en',
-    format: 'json',
+    ...params,
+    appid: config.openWeatherApiKey,
   })
 
-  const payload = await fetchJson(
-    `https://geocoding-api.open-meteo.com/v1/search?${query.toString()}`,
+  return fetchJson(`https://api.openweathermap.org${path}?${query.toString()}`, errorMessage)
+}
+
+function weatherConditionFromDescription(description) {
+  return titleCase(description ?? 'Unknown conditions')
+}
+
+function formatLocation(result) {
+  return [result.name, result.state, result.country].filter(Boolean).join(', ')
+}
+
+async function resolveCity(city) {
+  const payload = await fetchOpenWeather(
+    '/geo/1.0/direct',
+    {
+      q: city,
+      limit: '1',
+    },
     'Unable to reach the location service.',
   )
 
-  const result = payload?.results?.[0]
+  const result = payload?.[0]
   if (!result) {
     throw new AppError(404, `We could not find weather data for "${city}".`, 'CITY_NOT_FOUND')
   }
 
   return {
-    city: titleCase(result.name),
-    latitude: result.latitude,
-    longitude: result.longitude,
+    city: formatLocation(result),
+    latitude: result.lat,
+    longitude: result.lon,
   }
 }
 
 export async function getCurrentWeatherForCity(city) {
   const location = await resolveCity(city)
-  const query = new URLSearchParams({
-    latitude: String(location.latitude),
-    longitude: String(location.longitude),
-    current: 'temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code',
-    timezone: 'auto',
-  })
-
-  const payload = await fetchJson(
-    `https://api.open-meteo.com/v1/forecast?${query.toString()}`,
+  const payload = await fetchOpenWeather(
+    '/data/2.5/weather',
+    {
+      lat: String(location.latitude),
+      lon: String(location.longitude),
+      units: 'metric',
+    },
     'Unable to load current weather right now.',
   )
 
-  const current = payload?.current
-  if (!current) {
+  const main = payload?.main
+  const wind = payload?.wind
+  const weather = payload?.weather?.[0]
+  if (!main || !wind || !weather) {
     throw new AppError(502, 'Weather data was incomplete.', 'EXTERNAL_API_FAILURE')
   }
 
   return {
     city: location.city,
-    temperature: current.temperature_2m,
-    condition: weatherConditionFromCode(current.weather_code),
-    humidity: current.relative_humidity_2m,
-    windSpeed: current.wind_speed_10m,
+    temperature: main.temp,
+    condition: weatherConditionFromDescription(weather.description),
+    humidity: main.humidity,
+    windSpeed: Number((wind.speed * 3.6).toFixed(1)),
   }
 }
 
 export async function getForecastForCity(city) {
   const location = await resolveCity(city)
-  const query = new URLSearchParams({
-    latitude: String(location.latitude),
-    longitude: String(location.longitude),
-    daily: 'weather_code,temperature_2m_max,temperature_2m_min',
-    forecast_days: '5',
-    timezone: 'auto',
-  })
-
-  const payload = await fetchJson(
-    `https://api.open-meteo.com/v1/forecast?${query.toString()}`,
+  const payload = await fetchOpenWeather(
+    '/data/2.5/forecast',
+    {
+      lat: String(location.latitude),
+      lon: String(location.longitude),
+      units: 'metric',
+    },
     'Unable to load forecast data right now.',
   )
 
-  const daily = payload?.daily
-  if (!daily) {
+  const entries = payload?.list
+  if (!Array.isArray(entries) || entries.length === 0) {
     throw new AppError(502, 'Forecast data was incomplete.', 'EXTERNAL_API_FAILURE')
   }
 
-  return daily.time.map((date, index) => ({
-    city: location.city,
-    date,
-    high: daily.temperature_2m_max[index],
-    low: daily.temperature_2m_min[index],
-    condition: weatherConditionFromCode(daily.weather_code[index]),
-  }))
+  const dailyMap = new Map()
+
+  for (const entry of entries) {
+    const date = entry.dt_txt?.slice(0, 10)
+    if (!date) {
+      continue
+    }
+
+    const condition = weatherConditionFromDescription(entry.weather?.[0]?.description)
+    const existing = dailyMap.get(date)
+
+    if (!existing) {
+      dailyMap.set(date, {
+        date,
+        high: Number(entry.main?.temp_max ?? entry.main?.temp ?? 0),
+        low: Number(entry.main?.temp_min ?? entry.main?.temp ?? 0),
+        conditions: [condition],
+      })
+      continue
+    }
+
+    existing.high = Math.max(existing.high, Number(entry.main?.temp_max ?? entry.main?.temp ?? existing.high))
+    existing.low = Math.min(existing.low, Number(entry.main?.temp_min ?? entry.main?.temp ?? existing.low))
+    existing.conditions.push(condition)
+  }
+
+  return [...dailyMap.values()].slice(0, 5).map((day) => {
+    const conditionCounts = new Map()
+    for (const condition of day.conditions) {
+      conditionCounts.set(condition, (conditionCounts.get(condition) ?? 0) + 1)
+    }
+
+    const condition = [...conditionCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Unknown conditions'
+
+    return {
+      city: location.city,
+      date: day.date,
+      high: day.high,
+      low: day.low,
+      condition,
+    }
+  })
 }
 
 export async function validateCityExists(city) {

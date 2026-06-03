@@ -4,7 +4,11 @@ import { config } from './config.js'
 const { Pool } = pg
 
 export const pool = new Pool({
-  connectionString: config.databaseUrl,
+  host: config.databaseHost,
+  port: config.databasePort,
+  database: config.databaseName,
+  user: config.databaseUser,
+  password: config.databasePassword,
 })
 
 const schemaStatements = [

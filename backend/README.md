@@ -1,4 +1,4 @@
-# Backend
+# Weather Wave Backend
 
 This backend is an Express API backed by PostgreSQL and protected with JWT authentication.
 
@@ -16,12 +16,17 @@ It also boots the database tables automatically on startup if they do not alread
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and set values for:
+Set values in `.env` for:
 
 - `PORT`
-- `DATABASE_URL`
+- `DATABASE_HOST`
+- `DATABASE_PORT`
+- `DATABASE_NAME`
+- `DATABASE_USER`
+- `DATABASE_PASSWORD`
 - `JWT_SECRET`
 - `FRONTEND_ORIGIN`
+- `OPENWEATHER_API_KEY`
 
 ## Run
 
@@ -40,16 +45,16 @@ npm start
 
 ## Database
 
-The API expects a PostgreSQL database to be available at `DATABASE_URL`.
+The API expects a PostgreSQL database to be available using the values in the database environment variables.
 
 If you need to create the database manually, a connection target like this works well for local development:
 
 ```bash
-createdb weather_app
+createdb weather_wave
 ```
 
 ## Notes
 
-- Weather data is fetched from the Open-Meteo APIs.
+- Weather data is fetched from the OpenWeather APIs.
 - Invalid city names return a clear 404-style error.
 - Missing or invalid JWTs return 401 responses.

@@ -1,4 +1,4 @@
-# Weather App
+# Weather Wave
 
 This repository contains:
 
@@ -13,8 +13,8 @@ This repository contains:
 npm install
 ```
 
-2. Create `backend/.env` from `backend/.env.example` and set your PostgreSQL connection details and JWT secret.
-3. Make sure PostgreSQL is running and the database in `DATABASE_URL` exists.
+2. Create `backend/.env` with your PostgreSQL host, port, database name, username, password, JWT secret, and OpenWeather API key.
+3. Make sure PostgreSQL is running and the database in `DATABASE_NAME` exists. The local default database name is `weather_wave`.
 4. Start both apps:
 
 ```bash
@@ -41,6 +41,6 @@ Backend:
 
 ## Notes
 
-- Weather data comes from Open-Meteo.
+- Weather data comes from OpenWeather.
 - JWTs are required for weather and favorites endpoints.
 - The backend bootstraps its PostgreSQL tables on startup.

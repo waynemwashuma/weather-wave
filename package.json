@@ -1,8 +1,8 @@
 {
-  "name": "application-workflow-tracker",
+  "name": "weather-wave",
   "version": "1.0.0",
   "private": true,
-  "description": "Application Workflow Tracker monorepo.",
+  "description": "Weather Wave monorepo.",
   "scripts": {
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:backend": "npm run start -w backend",
