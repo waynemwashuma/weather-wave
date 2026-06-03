@@ -46,7 +46,7 @@ async function fetchOpenWeather(path, params, errorMessage) {
     appid: config.openWeatherApiKey,
   })
 
-  return fetchJson(`https://api.openweathermap.org${path}?${query.toString()}`, errorMessage)
+  return fetchJson(`${config.openWeatherBaseUrl}${path}?${query.toString()}`, errorMessage)
 }
 
 function weatherConditionFromDescription(description) {

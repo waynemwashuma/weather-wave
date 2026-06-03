@@ -4,12 +4,13 @@ import jwt from 'jsonwebtoken'
 import { pool } from '../db.js'
 import { config } from '../config.js'
 import { AppError } from '../errors.js'
+import { safeDecode } from '../utils.js'
 
 const router = express.Router()
 
 function sanitizeUser(row) {
   return {
-    id: row.id,
+    id: Number(row.id),
     name: row.name,
     email: row.email,
   }
@@ -89,6 +90,31 @@ router.post('/login', async (req, res, next) => {
     const token = jwt.sign(user, config.jwtSecret, { expiresIn: '7d' })
 
     res.json({ token, user })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.delete('/users/:email', async (req, res, next) => {
+  try {
+    const email = String(safeDecode(req.params.email) ?? '').trim().toLowerCase()
+
+    if (!email || !email.includes('@')) {
+      throw new AppError(400, 'Please provide a valid email address.', 'INVALID_INPUT')
+    }
+
+    const result = await pool.query(
+      `
+          DELETE FROM users
+          WHERE email = $1
+          RETURNING id
+        `,
+      [email],
+    )
+
+    res.json({
+      deleted: result.rowCount > 0,
+    })
   } catch (error) {
     next(error)
   }
