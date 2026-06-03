@@ -92,11 +92,11 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
     return () => window.cancelAnimationFrame(frame)
   }, [loadFavorites])
 
-  const runSearch = async (city: string) => {
+  const runSearch = async (city: string): Promise<CurrentWeather | null> => {
     const query = city.trim()
     if (!query) {
       setSearchError('Enter a city name to search.')
-      return
+      return null
     }
 
     setSearchLoading(true)
@@ -113,11 +113,13 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
       setForecast(forecastData)
       setSearchMessage(`Showing weather for ${weather.city}.`)
       setCityQuery(weather.city)
+      return weather
     } catch (error) {
       setSearchError(error instanceof Error ? error.message : 'Unable to fetch weather data.')
       setSearchMessage('Search for a city to begin.')
       setCurrentWeather(null)
       setForecast([])
+      return null
     } finally {
       setSearchLoading(false)
     }
@@ -126,6 +128,10 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
   const handleSearchSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     await runSearch(cityQuery)
+  }
+
+  const handleViewFavorite = async (city: string) => {
+    await runSearch(city)
   }
 
   const handleAddFavorite = async () => {
@@ -317,7 +323,10 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
           ) : favoriteWeather.length > 0 ? (
             <div className="favorites-list">
               {favoriteWeather.map((favorite) => (
-                <section className="favorite-card" key={favorite.city}>
+                <section
+                  className={`favorite-card ${currentWeather?.city === favorite.city ? 'favorite-card--active' : ''}`}
+                  key={favorite.city}
+                >
                   <div className="panel-title-row favorite-card-header">
                     <div>
                       <h3>{favorite.city}</h3>
@@ -328,14 +337,25 @@ function DashboardPage({ session, onSignOut }: DashboardPageProps) {
                       )}
                     </div>
 
-                    <button
-                      type="button"
-                      className="link-button"
-                      onClick={() => handleRemoveFavorite(favorite.city)}
-                      disabled={favoritesBusy === favorite.city}
-                    >
-                      {favoritesBusy === favorite.city ? 'Removing...' : 'Remove'}
-                    </button>
+                    <div className="favorite-card-actions">
+                      <button
+                        type="button"
+                        className="link-button"
+                        onClick={() => handleViewFavorite(favorite.city)}
+                        disabled={searchLoading && currentWeather?.city === favorite.city}
+                      >
+                        {currentWeather?.city === favorite.city && !searchLoading ? 'Viewing' : 'View report'}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="link-button"
+                        onClick={() => handleRemoveFavorite(favorite.city)}
+                        disabled={favoritesBusy === favorite.city}
+                      >
+                        {favoritesBusy === favorite.city ? 'Removing...' : 'Remove'}
+                      </button>
+                    </div>
                   </div>
 
                   {!favorite.error && (

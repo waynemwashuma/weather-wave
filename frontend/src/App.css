@@ -424,6 +424,31 @@
   flex: 0 0 auto;
 }
 
+.favorite-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex: 0 0 auto;
+}
+
+.favorite-card {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.favorite-card:hover {
+  transform: translateY(-1px);
+  border-color: #bcd2e6;
+  box-shadow: 0 14px 30px rgba(15, 53, 101, 0.08);
+}
+
+.favorite-card--active {
+  border-color: #2a7fc2;
+  box-shadow: 0 0 0 1px rgba(42, 127, 194, 0.22), 0 18px 36px rgba(15, 53, 101, 0.12);
+}
+
 .empty-state {
   margin-top: 1rem;
 }
