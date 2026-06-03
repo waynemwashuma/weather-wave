@@ -7,8 +7,8 @@ import {
   removeFavoriteCity,
   type CurrentWeather,
   type ForecastDay,
-} from '../lib/api'
-import type { UserSession } from '../lib/session'
+} from '../shared/api'
+import type { UserSession } from '../shared/session'
 import '../App.css'
 
 type DashboardPageProps = {

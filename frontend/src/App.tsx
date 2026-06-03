@@ -2,7 +2,7 @@ import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
-import { clearSession, readSession, saveSession, type UserSession } from './lib/session'
+import { clearSession, readSession, saveSession, type UserSession } from './shared/session'
 
 function App() {
   const navigate = useNavigate()

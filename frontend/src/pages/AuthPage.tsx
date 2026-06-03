@@ -4,7 +4,7 @@ import {
   registerUser,
   type AuthPayload,
   type UserSession,
-} from '../lib/api'
+} from '../shared/api'
 import '../App.css'
 
 type AuthMode = 'sign-in' | 'sign-up'

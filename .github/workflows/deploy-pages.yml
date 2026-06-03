@@ -36,6 +36,7 @@ jobs:
         run: npm run build -w frontend
         env:
           GITHUB_PAGES: 'true'
+          MOCK_SERVER: 'true'
 
       - name: Add SPA fallback page
         run: cp frontend/dist/index.html frontend/dist/404.html
