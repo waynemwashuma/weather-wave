@@ -1,11 +1,8 @@
 # Weather Wave
 
+Weather Wave is a full-stack weather app with a React frontend and an Express + PostgreSQL backend. It supports user authentication, saved favorite cities, and current weather plus forecast data powered by OpenWeather.
+
 ## Quick Start
-
-This repository contains:
-
-- A React frontend in `frontend/`
-- An Express + PostgreSQL backend in `backend/`
 
 1. Install dependencies from the repository root:
 
