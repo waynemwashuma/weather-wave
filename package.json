@@ -12,12 +12,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/waynemwashuma/applicant.git"
+    "url": "git+https://github.com/waynemwashuma/weather-wave.git"
   },
   "bugs": {
-    "url": "https://github.com/waynemwashuma/applicant/issues"
+    "url": "https://github.com/waynemwashuma/weather-wave/issues"
   },
-  "homepage": "https://waynemwashuma.github.io/applicant/",
+  "homepage": "https://weather-wave.mwashuma.dev/",
   "workspaces": [
     "frontend",
     "backend"
